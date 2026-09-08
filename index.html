@@ -20,7 +20,7 @@
     height:100%;
     background:#000;
     color:var(--tinta);
-    font-family:"Google Sans","Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-family:"Google Sans","Roboto","Noto Sans","Helvetica Neue",Arial,sans-serif;
     overflow:hidden;
     overscroll-behavior:none;
     touch-action:none;
@@ -99,6 +99,12 @@
   #zonaTruco{position:absolute;top:23%;left:0;right:0;height:36%;z-index:5}
   body.depurar #zonaTruco{outline:1px dashed rgba(0,200,255,.5)}
 
+  #pista{
+    position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+    text-align:center;font-size:14px;letter-spacing:.3px;
+    color:rgba(242,242,242,.20);
+  }
+
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -106,8 +112,13 @@
 
 <div id="app">
 
-  <!-- 1. APAGADA: rejilla invisible 3x3 en la mitad inferior -->
-  <section id="apagada" class="capa visible">
+  <!-- 0. PREPARAR: el primer toque solo pide pantalla completa -->
+  <section id="preparar" class="capa visible">
+    <div id="pista">toca para preparar</div>
+  </section>
+
+  <!-- 1. APAGADA: rejilla invisible 3x3 -->
+  <section id="apagada" class="capa">
     <div id="rejilla"></div>
   </section>
 
@@ -175,7 +186,7 @@
   /* ======================================================= */
 
   const $ = s => document.querySelector(s);
-  const apagada = $('#apagada'), bloqueo = $('#bloqueo');
+  const preparar = $('#preparar'), apagada = $('#apagada'), bloqueo = $('#bloqueo');
   const elHora = $('#hora'), elFecha = $('#fecha');
   const depurar = /[?&]debug/.test(location.search);
   if (depurar) document.body.classList.add('depurar');
@@ -185,6 +196,7 @@
   let minutosElegidos = 0;   // lo que dirá el espectador que "retrocedió"
   let desfaseMs = 0;         // adelanto aplicado al reloj real (negativo = va por delante)
   let yaDisparado = false;
+  let activoDesde = 0;       // ignora toques justo tras entrar en pantalla completa
   let animando = false;
   let tick = null;
 
@@ -250,9 +262,19 @@
   }
   if (CONFIG.rejillaPantallaCompleta) rejilla.style.height = '100%';
 
+  preparar.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    pantallaCompleta();
+    mantenerEncendida();
+    if (navigator.vibrate) { try { navigator.vibrate(15); } catch(err){} }
+    preparar.classList.remove('visible');
+    apagada.classList.add('visible');
+    activoDesde = Date.now() + 500;
+  }, { passive:false });
+
   rejilla.addEventListener('pointerdown', e => {
     const celda = e.target.closest('[data-n]');
-    if (!celda) return;
+    if (!celda || Date.now() < activoDesde) return;
     e.preventDefault();
     elegir(parseInt(celda.dataset.n, 10));
   }, { passive:false });
@@ -330,6 +352,7 @@
     desfaseMs = 0;
     bloqueo.classList.remove('visible');
     apagada.classList.add('visible');
+    activoDesde = Date.now() + 500;
     if (navigator.vibrate) { try { navigator.vibrate([12,60,12]); } catch(e){} }
   }
 
