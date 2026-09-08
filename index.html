@@ -226,7 +226,15 @@
   function detenerTick(){ if (tick) { clearInterval(tick); tick = null; } }
 
   /* ---------- Pantalla completa + pantalla siempre encendida ---------- */
+  function esAppInstalada(){
+    try {
+      return window.matchMedia('(display-mode: fullscreen)').matches ||
+             window.matchMedia('(display-mode: standalone)').matches ||
+             navigator.standalone === true;
+    } catch(e){ return false; }
+  }
   function pantallaCompleta(){
+    if (esAppInstalada()) return;   // ya viene en pantalla completa: no pedir nada
     const el = document.documentElement;
     const f = el.requestFullscreen || el.webkitRequestFullscreen;
     if (f && !document.fullscreenElement) { try { f.call(el, { navigationUI:'hide' }); } catch(e){ try { f.call(el); } catch(_){} } }
