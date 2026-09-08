@@ -1,341 +1,464 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#000000">
-<link rel="manifest" href="manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Reloj</title>
-<style>
-  :root{
-    --tinta:#f2f2f2;
-    --tenue:rgba(242,242,242,.62);
-    --apagado:rgba(242,242,242,.28);
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{
-    height:100%;
-    background:#000;
-    color:var(--tinta);
-    font-family:"Google Sans","Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
-    overflow:hidden;
-    overscroll-behavior:none;
-    touch-action:none;
-    -webkit-user-select:none;user-select:none;
-    -webkit-tap-highlight-color:transparent;
-    -webkit-touch-callout:none;
-  }
-  #app{position:fixed;inset:0}
-  .capa{position:absolute;inset:0;display:none}
-  .capa.visible{display:block}
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Reloj</title>
+  <style>
+    :root {
+      --tinta: #f2f2f2;
+      --tenue: rgba(242, 242, 242, .62);
+      --apagado: rgba(242, 242, 242, .28);
+    }
 
-  /* ---------- 1. Pantalla apagada ---------- */
-  #rejilla{
-    position:absolute;left:0;right:0;bottom:0;height:50%;
-    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
-  }
-  #rejilla div{width:100%;height:100%}
-  body.depurar #rejilla div{
-    outline:1px dashed rgba(255,255,255,.35);
-    display:flex;align-items:center;justify-content:center;
-    font-size:28px;color:rgba(255,255,255,.45)
-  }
-  body.depurar #rejilla div::after{content:attr(data-n)}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-  /* ---------- 2. Pantalla de bloqueo ---------- */
-  #bloqueo{
-    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  }
-  #barra{
-    position:absolute;top:0;left:0;right:0;height:30px;
-    display:flex;align-items:center;justify-content:flex-end;gap:7px;
-    padding:0 16px;font-size:12px;color:var(--tenue);
-  }
-  #barra svg{display:block}
-  #bateriaTexto{font-size:12px;letter-spacing:.2px}
+    html,
+    body {
+      height: 100%;
+      background: #000;
+      color: var(--tinta);
+      font-family: "Google Sans", "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
 
-  #candado{
-    position:absolute;top:calc(30px + 5vh);left:0;right:0;
-    display:flex;justify-content:center;color:var(--apagado);
-  }
-  #reloj{
-    position:absolute;top:0;left:0;right:0;bottom:0;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    transform:translateY(-6vh);
-  }
-  #hora{
-    font-size:clamp(76px,23vw,148px);
-    font-weight:200;
-    line-height:1;
-    letter-spacing:-.035em;
-    font-variant-numeric:tabular-nums;
-    font-feature-settings:"tnum" 1;
-  }
-  #fecha{
-    margin-top:14px;
-    font-size:clamp(15px,4.2vw,18px);
-    font-weight:400;
-    letter-spacing:.2px;
-    color:var(--tenue);
-  }
-  #inferior{
-    position:absolute;left:0;right:0;bottom:calc(28px + env(safe-area-inset-bottom));
-    display:flex;align-items:center;justify-content:space-between;padding:0 34px;
-  }
-  .boton-redondo{
-    width:52px;height:52px;border-radius:50%;
-    background:rgba(255,255,255,.09);
-    display:flex;align-items:center;justify-content:center;
-    color:var(--tenue);
-  }
-  #barrita{
-    position:absolute;left:50%;transform:translateX(-50%);
-    bottom:calc(9px + env(safe-area-inset-bottom));
-    width:108px;height:4px;border-radius:2px;background:rgba(255,255,255,.32);
-  }
-  #zonaTruco{position:absolute;top:0;left:0;right:0;height:62%;z-index:5}
-  body.depurar #zonaTruco{outline:1px dashed rgba(0,200,255,.5)}
+    #app {
+      position: fixed;
+      inset: 0
+    }
 
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+    .capa {
+      position: absolute;
+      inset: 0;
+      display: none
+    }
+
+    .capa.visible {
+      display: block
+    }
+
+    /* ---------- 1. Pantalla apagada ---------- */
+    #rejilla {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 50%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+    }
+
+    #rejilla div {
+      width: 100%;
+      height: 100%
+    }
+
+    body.depurar #rejilla div {
+      outline: 1px dashed rgba(255, 255, 255, .35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: rgba(255, 255, 255, .45)
+    }
+
+    body.depurar #rejilla div::after {
+      content: attr(data-n)
+    }
+
+    /* ---------- 2. Pantalla de bloqueo ---------- */
+    #bloqueo {
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    #barra {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--tenue);
+    }
+
+    #barra svg {
+      display: block
+    }
+
+    #bateriaTexto {
+      font-size: 12px;
+      letter-spacing: .2px
+    }
+
+    #candado {
+      position: absolute;
+      top: calc(30px + 5vh);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      color: var(--apagado);
+    }
+
+    #reloj {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(-6vh);
+    }
+
+    #hora {
+      font-size: clamp(76px, 23vw, 148px);
+      font-weight: 200;
+      line-height: 1;
+      letter-spacing: -.035em;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
+
+    #fecha {
+      margin-top: 14px;
+      font-size: clamp(15px, 4.2vw, 18px);
+      font-weight: 400;
+      letter-spacing: .2px;
+      color: var(--tenue);
+    }
+
+    #inferior {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: calc(28px + env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 34px;
+    }
+
+    .boton-redondo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .09);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--tenue);
+    }
+
+    #barrita {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(9px + env(safe-area-inset-bottom));
+      width: 108px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .32);
+    }
+
+    #zonaTruco {
+      position: absolute;
+      top: 23%;
+      left: 0;
+      right: 0;
+      height: 36%;
+      z-index: 5
+    }
+
+    body.depurar #zonaTruco {
+      outline: 1px dashed rgba(0, 200, 255, .5)
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        transition: none !important
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="app">
+  <div id="app">
 
-  <!-- 1. APAGADA: rejilla invisible 3x3 en la mitad inferior -->
-  <section id="apagada" class="capa visible">
-    <div id="rejilla"></div>
-  </section>
+    <!-- 1. APAGADA: rejilla invisible 3x3 en la mitad inferior -->
+    <section id="apagada" class="capa visible">
+      <div id="rejilla"></div>
+    </section>
 
-  <!-- 2. BLOQUEO -->
-  <section id="bloqueo" class="capa">
-    <div id="barra">
-      <svg width="15" height="12" viewBox="0 0 15 12" fill="currentColor" aria-hidden="true"><path d="M7.5 11.4 0 3.3A10.6 10.6 0 0 1 7.5 0 10.6 10.6 0 0 1 15 3.3Z"/></svg>
-      <svg width="13" height="12" viewBox="0 0 13 12" fill="currentColor" aria-hidden="true"><rect x="0" y="8" width="2.4" height="4" rx=".6"/><rect x="3.5" y="5.5" width="2.4" height="6.5" rx=".6"/><rect x="7" y="3" width="2.4" height="9" rx=".6"/><rect x="10.5" y="0" width="2.4" height="12" rx=".6"/></svg>
-      <span id="bateriaTexto">86%</span>
-      <svg width="22" height="11" viewBox="0 0 22 11" fill="none" aria-hidden="true">
-        <rect x=".6" y=".6" width="18" height="9.8" rx="2.4" stroke="currentColor" stroke-width="1.1"/>
-        <rect id="bateriaNivel" x="2.1" y="2.1" width="12.5" height="6.8" rx="1.3" fill="currentColor"/>
-        <path d="M20.4 3.9v3.2a2.1 2.1 0 0 0 0-3.2Z" fill="currentColor"/>
-      </svg>
-    </div>
-
-    <div id="candado">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-        <rect x="4.5" y="10.5" width="15" height="10" rx="2.6"/>
-        <path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/>
-      </svg>
-    </div>
-
-    <div id="reloj">
-      <div id="hora">00:00</div>
-      <div id="fecha">—</div>
-    </div>
-
-    <div id="inferior">
-      <div class="boton-redondo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M9 5.5h6l1.2 2.2H20a1.6 1.6 0 0 1 1.6 1.6v8.6A1.6 1.6 0 0 1 20 19.5H4a1.6 1.6 0 0 1-1.6-1.6V9.3A1.6 1.6 0 0 1 4 7.7h3.8Z"/>
-          <circle cx="12" cy="13.2" r="3.4"/>
+    <!-- 2. BLOQUEO -->
+    <section id="bloqueo" class="capa">
+      <div id="barra">
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="currentColor" aria-hidden="true">
+          <path d="M7.5 11.4 0 3.3A10.6 10.6 0 0 1 7.5 0 10.6 10.6 0 0 1 15 3.3Z" />
+        </svg>
+        <svg width="13" height="12" viewBox="0 0 13 12" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="8" width="2.4" height="4" rx=".6" />
+          <rect x="3.5" y="5.5" width="2.4" height="6.5" rx=".6" />
+          <rect x="7" y="3" width="2.4" height="9" rx=".6" />
+          <rect x="10.5" y="0" width="2.4" height="12" rx=".6" />
+        </svg>
+        <span id="bateriaTexto">86%</span>
+        <svg width="22" height="11" viewBox="0 0 22 11" fill="none" aria-hidden="true">
+          <rect x=".6" y=".6" width="18" height="9.8" rx="2.4" stroke="currentColor" stroke-width="1.1" />
+          <rect id="bateriaNivel" x="2.1" y="2.1" width="12.5" height="6.8" rx="1.3" fill="currentColor" />
+          <path d="M20.4 3.9v3.2a2.1 2.1 0 0 0 0-3.2Z" fill="currentColor" />
         </svg>
       </div>
-      <div class="boton-redondo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-          <path d="M8.6 3.5h6.8l-.7 5.2a4.6 4.6 0 0 1 1.1 3v9a1.8 1.8 0 0 1-1.8 1.8h-4a1.8 1.8 0 0 1-1.8-1.8v-9a4.6 4.6 0 0 1 1.1-3Z"/>
-          <path d="M9.4 13.6h5.2"/>
+
+      <div id="candado">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+          aria-hidden="true">
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2.6" />
+          <path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9" />
         </svg>
       </div>
-    </div>
-    <div id="barrita"></div>
 
-    <div id="zonaTruco"></div>
-  </section>
+      <div id="reloj">
+        <div id="hora">00:00</div>
+        <div id="fecha">—</div>
+      </div>
 
-</div>
+      <div id="inferior">
+        <div class="boton-redondo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            aria-hidden="true">
+            <path
+              d="M9 5.5h6l1.2 2.2H20a1.6 1.6 0 0 1 1.6 1.6v8.6A1.6 1.6 0 0 1 20 19.5H4a1.6 1.6 0 0 1-1.6-1.6V9.3A1.6 1.6 0 0 1 4 7.7h3.8Z" />
+            <circle cx="12" cy="13.2" r="3.4" />
+          </svg>
+        </div>
+        <div class="boton-redondo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            aria-hidden="true">
+            <path
+              d="M8.6 3.5h6.8l-.7 5.2a4.6 4.6 0 0 1 1.1 3v9a1.8 1.8 0 0 1-1.8 1.8h-4a1.8 1.8 0 0 1-1.8-1.8v-9a4.6 4.6 0 0 1 1.1-3Z" />
+            <path d="M9.4 13.6h5.2" />
+          </svg>
+        </div>
+      </div>
+      <div id="barrita"></div>
 
-<script>
-(function(){
-  "use strict";
+      <div id="zonaTruco"></div>
+    </section>
 
-  /* ================== AJUSTES DEL TRUCO ================== */
-  const CONFIG = {
-    msPorMinuto: 700,      // ritmo del retroceso
-    vibracion: 40,         // ms de micro-vibración por minuto
-    formato24h: true,      // false = formato de 12 h (sin AM/PM, como Android)
-    mostrarBarraEstado: true,
-    mostrarIconosAbajo: true,
-    pausaAntesDeEmpezar: 450 // respiro tras el toque, antes del primer salto
-  };
-  /* ======================================================= */
+  </div>
 
-  const $ = s => document.querySelector(s);
-  const apagada = $('#apagada'), bloqueo = $('#bloqueo');
-  const elHora = $('#hora'), elFecha = $('#fecha');
-  const depurar = /[?&]debug/.test(location.search);
-  if (depurar) document.body.classList.add('depurar');
-  if (!CONFIG.mostrarBarraEstado) $('#barra').style.display = 'none';
-  if (!CONFIG.mostrarIconosAbajo) $('#inferior').style.display = 'none';
+  <script>
+    (function () {
+      "use strict";
 
-  let minutosElegidos = 0;   // lo que dirá el espectador que "retrocedió"
-  let desfaseMs = 0;         // desfase aplicado al reloj real
-  let animando = false;
-  let tick = null;
+      /* ================== AJUSTES DEL TRUCO ================== */
+      const CONFIG = {
+        msPorMinuto: 700,      // ritmo del retroceso
+        vibracion: 40,         // ms de micro-vibración por minuto
+        vibracionConfirmacion: 25,   // aviso al confirmar que el número quedó cargado
+        rejillaPantallaCompleta: true, // true = las 9 zonas ocupan toda la pantalla
+        formato24h: true,      // false = formato de 12 h (sin AM/PM, como Android)
+        mostrarBarraEstado: true,
+        mostrarIconosAbajo: true,
+        pausaAntesDeEmpezar: 450 // respiro tras el toque, antes del primer salto
+      };
+      /* ======================================================= */
 
-  /* ---------- Reloj ---------- */
-  const dosDigitos = n => String(n).padStart(2, '0');
+      const $ = s => document.querySelector(s);
+      const apagada = $('#apagada'), bloqueo = $('#bloqueo');
+      const elHora = $('#hora'), elFecha = $('#fecha');
+      const depurar = /[?&]debug/.test(location.search);
+      if (depurar) document.body.classList.add('depurar');
+      if (!CONFIG.mostrarBarraEstado) $('#barra').style.display = 'none';
+      if (!CONFIG.mostrarIconosAbajo) $('#inferior').style.display = 'none';
 
-  function textoHora(d){
-    let h = d.getHours();
-    if (!CONFIG.formato24h) { h = h % 12 || 12; return h + ':' + dosDigitos(d.getMinutes()); }
-    return dosDigitos(h) + ':' + dosDigitos(d.getMinutes());
-  }
-  function textoFecha(d){
-    const t = d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
-    return t.charAt(0).toUpperCase() + t.slice(1);
-  }
-  function pintar(d){
-    elHora.textContent = textoHora(d);
-    elFecha.textContent = textoFecha(d);
-  }
-  function iniciarTick(){
-    detenerTick();
-    pintar(new Date(Date.now() - desfaseMs));
-    tick = setInterval(() => {
-      if (!animando) pintar(new Date(Date.now() - desfaseMs));
-    }, 1000);
-  }
-  function detenerTick(){ if (tick) { clearInterval(tick); tick = null; } }
+      let minutosElegidos = 0;   // lo que dirá el espectador que "retrocedió"
+      let desfaseMs = 0;         // desfase aplicado al reloj real
+      let animando = false;
+      let tick = null;
 
-  /* ---------- Pantalla completa + pantalla siempre encendida ---------- */
-  function pantallaCompleta(){
-    const el = document.documentElement;
-    const f = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (f && !document.fullscreenElement) { try { f.call(el, { navigationUI:'hide' }); } catch(e){ try { f.call(el); } catch(_){} } }
-  }
-  let wakeLock = null;
-  async function mantenerEncendida(){
-    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e){}
-  }
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && !wakeLock) mantenerEncendida();
-  });
+      /* ---------- Reloj ---------- */
+      const dosDigitos = n => String(n).padStart(2, '0');
 
-  /* ---------- Batería (solo estética) ---------- */
-  function pintarBateria(nivel, cargando){
-    const pct = Math.round(nivel * 100);
-    $('#bateriaTexto').textContent = pct + '%';
-    $('#bateriaNivel').setAttribute('width', String(Math.max(1.2, 15.9 * nivel).toFixed(1)));
-    if (cargando) $('#bateriaTexto').textContent = pct + '%';
-  }
-  if (navigator.getBattery) {
-    navigator.getBattery().then(b => {
-      pintarBateria(b.level, b.charging);
-      b.addEventListener('levelchange', () => pintarBateria(b.level, b.charging));
-    }).catch(()=>{});
-  }
+      function textoHora(d) {
+        let h = d.getHours();
+        if (!CONFIG.formato24h) { h = h % 12 || 12; return h + ':' + dosDigitos(d.getMinutes()); }
+        return dosDigitos(h) + ':' + dosDigitos(d.getMinutes());
+      }
+      function textoFecha(d) {
+        const t = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        return t.charAt(0).toUpperCase() + t.slice(1);
+      }
+      function pintar(d) {
+        elHora.textContent = textoHora(d);
+        elFecha.textContent = textoFecha(d);
+      }
+      function iniciarTick() {
+        detenerTick();
+        pintar(new Date(Date.now() - desfaseMs));
+        tick = setInterval(() => {
+          if (!animando) pintar(new Date(Date.now() - desfaseMs));
+        }, 1000);
+      }
+      function detenerTick() { if (tick) { clearInterval(tick); tick = null; } }
 
-  /* ---------- 1. Rejilla invisible 3x3 (teclado telefónico) ---------- */
-  const rejilla = $('#rejilla');
-  for (let n = 1; n <= 9; n++) {
-    const celda = document.createElement('div');
-    celda.dataset.n = n;
-    rejilla.appendChild(celda);
-  }
-  rejilla.addEventListener('pointerdown', e => {
-    const celda = e.target.closest('[data-n]');
-    if (!celda) return;
-    e.preventDefault();
-    elegir(parseInt(celda.dataset.n, 10));
-  }, { passive:false });
+      /* ---------- Pantalla completa + pantalla siempre encendida ---------- */
+      function pantallaCompleta() {
+        const el = document.documentElement;
+        const f = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (f && !document.fullscreenElement) { try { f.call(el, { navigationUI: 'hide' }); } catch (e) { try { f.call(el); } catch (_) { } } }
+      }
+      let wakeLock = null;
+      async function mantenerEncendida() {
+        try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { }
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && !wakeLock) mantenerEncendida();
+      });
 
-  function elegir(n){
-    minutosElegidos = n;
-    desfaseMs = 0;
-    animando = false;
-    pantallaCompleta();
-    mantenerEncendida();
-    apagada.classList.remove('visible');
-    bloqueo.classList.add('visible');
-    iniciarTick();
-    if (depurar) console.log('Minutos cargados:', n);
-  }
+      /* ---------- Batería (solo estética) ---------- */
+      function pintarBateria(nivel, cargando) {
+        const pct = Math.round(nivel * 100);
+        $('#bateriaTexto').textContent = pct + '%';
+        $('#bateriaNivel').setAttribute('width', String(Math.max(1.2, 15.9 * nivel).toFixed(1)));
+        if (cargando) $('#bateriaTexto').textContent = pct + '%';
+      }
+      if (navigator.getBattery) {
+        navigator.getBattery().then(b => {
+          pintarBateria(b.level, b.charging);
+          b.addEventListener('levelchange', () => pintarBateria(b.level, b.charging));
+        }).catch(() => { });
+      }
 
-  /* ---------- 3. Disparo del retroceso ---------- */
-  const dormir = ms => new Promise(r => setTimeout(r, ms));
-  function vibrar(){ if (navigator.vibrate) { try { navigator.vibrate(CONFIG.vibracion); } catch(e){} } }
+      /* ---------- 1. Rejilla invisible 3x3 (teclado telefónico) ---------- */
+      const rejilla = $('#rejilla');
+      for (let n = 1; n <= 9; n++) {
+        const celda = document.createElement('div');
+        celda.dataset.n = n;
+        rejilla.appendChild(celda);
+      }
+      if (CONFIG.rejillaPantallaCompleta) rejilla.style.height = '100%';
 
-  $('#zonaTruco').addEventListener('pointerdown', e => {
-    e.preventDefault();
-    pantallaCompleta();
-    retroceder();
-  }, { passive:false });
+      rejilla.addEventListener('pointerdown', e => {
+        const celda = e.target.closest('[data-n]');
+        if (!celda) return;
+        e.preventDefault();
+        elegir(parseInt(celda.dataset.n, 10));
+      }, { passive: false });
 
-  async function retroceder(){
-    if (animando || minutosElegidos <= 0 || desfaseMs > 0) return;
-    animando = true;
-    const base = Date.now();
-    await dormir(CONFIG.pausaAntesDeEmpezar);
-    for (let k = 1; k <= minutosElegidos; k++) {
-      pintar(new Date(base - k * 60000));
-      vibrar();
-      if (k < minutosElegidos) await dormir(CONFIG.msPorMinuto);
-    }
-    desfaseMs = minutosElegidos * 60000;  // el reloj sigue vivo, ya desfasado
-    animando = false;
-  }
+      function elegir(n) {
+        minutosElegidos = n;
+        desfaseMs = 0;
+        animando = false;
+        if (navigator.vibrate) { try { navigator.vibrate(CONFIG.vibracionConfirmacion); } catch (e) { } }
+        pantallaCompleta();
+        mantenerEncendida();
+        apagada.classList.remove('visible');
+        bloqueo.classList.add('visible');
+        iniciarTick();
+        if (depurar) console.log('Minutos cargados:', n);
+      }
 
-  /* ---------- 4. Reinicio: deslizar hacia abajo con dos dedos ---------- */
-  let inicioDosDedos = null;
-  document.addEventListener('touchstart', e => {
-    inicioDosDedos = e.touches.length === 2
-      ? (e.touches[0].clientY + e.touches[1].clientY) / 2
-      : null;
-  }, { passive:true });
+      /* ---------- 3. Disparo del retroceso ---------- */
+      const dormir = ms => new Promise(r => setTimeout(r, ms));
+      function vibrar() { if (navigator.vibrate) { try { navigator.vibrate(CONFIG.vibracion); } catch (e) { } } }
 
-  document.addEventListener('touchmove', e => {
-    if (inicioDosDedos === null || e.touches.length !== 2) return;
-    const y = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    if (y - inicioDosDedos > 110) { inicioDosDedos = null; reiniciar(); }
-  }, { passive:true });
+      $('#zonaTruco').addEventListener('pointerdown', e => {
+        e.preventDefault();
+        pantallaCompleta();
+        retroceder();
+      }, { passive: false });
 
-  document.addEventListener('touchend', () => { inicioDosDedos = null; }, { passive:true });
+      async function retroceder() {
+        if (animando || minutosElegidos <= 0 || desfaseMs > 0) return;
+        animando = true;
+        const base = Date.now();
+        await dormir(CONFIG.pausaAntesDeEmpezar);
+        for (let k = 1; k <= minutosElegidos; k++) {
+          pintar(new Date(base - k * 60000));
+          vibrar();
+          if (k < minutosElegidos) await dormir(CONFIG.msPorMinuto);
+        }
+        desfaseMs = minutosElegidos * 60000;  // el reloj sigue vivo, ya desfasado
+        animando = false;
+      }
 
-  // Salida de emergencia: mantener pulsada la esquina inferior izquierda 1,5 s
-  let temporizadorEsquina = null;
-  document.addEventListener('pointerdown', e => {
-    if (e.clientX < 60 && e.clientY > innerHeight - 60) {
-      temporizadorEsquina = setTimeout(reiniciar, 1500);
-    }
-  });
-  ['pointerup','pointercancel','pointermove'].forEach(ev =>
-    document.addEventListener(ev, () => { clearTimeout(temporizadorEsquina); }));
+      /* ---------- 4. Reinicio: deslizar hacia abajo con dos dedos ---------- */
+      let inicioDosDedos = null;
+      document.addEventListener('touchstart', e => {
+        inicioDosDedos = e.touches.length === 2
+          ? (e.touches[0].clientY + e.touches[1].clientY) / 2
+          : null;
+      }, { passive: true });
 
-  function reiniciar(){
-    animando = false;
-    detenerTick();
-    minutosElegidos = 0;
-    desfaseMs = 0;
-    bloqueo.classList.remove('visible');
-    apagada.classList.add('visible');
-    if (navigator.vibrate) { try { navigator.vibrate([12,60,12]); } catch(e){} }
-  }
+      document.addEventListener('touchmove', e => {
+        if (inicioDosDedos === null || e.touches.length !== 2) return;
+        const y = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        if (y - inicioDosDedos > 110) { inicioDosDedos = null; reiniciar(); }
+      }, { passive: true });
 
-  /* ---------- Estorbos fuera ---------- */
-  document.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('dblclick', e => e.preventDefault());
-  document.addEventListener('gesturestart', e => e.preventDefault());
+      document.addEventListener('touchend', () => { inicioDosDedos = null; }, { passive: true });
 
-  /* ---------- Service worker: la app abre sin internet ---------- */
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(function(){});
-  }
+      // Salida de emergencia: mantener pulsada la esquina inferior izquierda 1,5 s
+      let temporizadorEsquina = null;
+      document.addEventListener('pointerdown', e => {
+        if (e.clientX < 60 && e.clientY > innerHeight - 60) {
+          temporizadorEsquina = setTimeout(reiniciar, 1500);
+        }
+      });
+      ['pointerup', 'pointercancel', 'pointermove'].forEach(ev =>
+        document.addEventListener(ev, () => { clearTimeout(temporizadorEsquina); }));
 
-  iniciarTick();
-})();
-</script>
+      function reiniciar() {
+        animando = false;
+        detenerTick();
+        minutosElegidos = 0;
+        desfaseMs = 0;
+        bloqueo.classList.remove('visible');
+        apagada.classList.add('visible');
+        if (navigator.vibrate) { try { navigator.vibrate([12, 60, 12]); } catch (e) { } }
+      }
+
+      /* ---------- Estorbos fuera ---------- */
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('dblclick', e => e.preventDefault());
+      document.addEventListener('gesturestart', e => e.preventDefault());
+
+      /* ---------- Service worker: la app abre sin internet ---------- */
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function () { });
+      }
+
+      iniciarTick();
+    })();
+  </script>
 </body>
+
 </html>
